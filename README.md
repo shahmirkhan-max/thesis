@@ -4,3 +4,4 @@ pandas
 numpy
 sci-kit
 matplotlib
+plotly.express
