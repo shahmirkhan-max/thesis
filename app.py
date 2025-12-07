@@ -2,7 +2,6 @@ import os
 
 import numpy as np
 import pandas as pd
-import plotly.express as px
 import streamlit as st
 from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LinearRegression
@@ -50,12 +49,13 @@ st.set_page_config(
     layout="wide",
 )
 
-st.title("📊 Socioeconomic Regression Dashboard (Local Data, No Statsmodels)")
+st.title("📊 Socioeconomic Regression Dashboard (Local Data, No Statsmodels / Plotly)")
 
 st.markdown(
     """
 This app loads a **local socioeconomic regression file**, runs a **linear regression** using
-`scikit-learn` (no `statsmodels`), and shows **Plotly visualisations**.
+`scikit-learn` (no `statsmodels`), and shows visualisations using Streamlit's built-in chart
+functions (no `plotly`).
 
 - Outcome: typically **Attainment 8** (`avg_att8`)
 - Predictors: FSM, IDACI, EAL, SEN, Ofsted rating, region, school type, etc.
@@ -188,7 +188,7 @@ X = model_df[predictor_cols].copy()
 y = model_df[target_col].copy()
 
 # ======================================================
-# PREPROCESSING & PIPELINE (NO STATSMODELS)
+# PREPROCESSING & PIPELINE (NO STATSMODELS / PLOTLY)
 # ======================================================
 
 transformers = []
@@ -278,7 +278,7 @@ feature_importance_df = pd.DataFrame(
 ).sort_values("abs_coefficient", ascending=False)
 
 # ======================================================
-# VISUALISATIONS (PLOTLY) – VISIBLE ON DASHBOARD
+# VISUALISATIONS (STREAMLIT NATIVE CHARTS)
 # ======================================================
 
 st.subheader("📊 Visualisations")
@@ -296,15 +296,12 @@ with tab1:
             "Predicted": y_test_pred,
         }
     )
-    fig_ap = px.scatter(
+    # Streamlit scatter chart
+    st.scatter_chart(
         ap_df,
         x="Actual",
         y="Predicted",
-        labels={"Actual": f"Actual {target_col}", "Predicted": f"Predicted {target_col}"},
-        title="Actual vs Predicted (Test Set)",
     )
-    # IMPORTANT: no trendline="ols" here (would require statsmodels)
-    st.plotly_chart(fig_ap, use_container_width=True)
 
 # 2) Residuals vs Predicted
 with tab2:
@@ -316,29 +313,22 @@ with tab2:
             "Residuals": residuals,
         }
     )
-    fig_res = px.scatter(
+    st.scatter_chart(
         res_df,
         x="Predicted",
         y="Residuals",
-        labels={"Predicted": f"Predicted {target_col}", "Residuals": "Residuals"},
-        title="Residuals vs Predicted",
     )
-    fig_res.add_hline(y=0, line_dash="dash")
-    st.plotly_chart(fig_res, use_container_width=True)
+    st.caption("Residuals should be roughly centred around zero if model assumptions hold.")
 
 # 3) Feature Importance
 with tab3:
     st.markdown("### Feature Importance (Absolute Coefficients)")
-    fig_coef = px.bar(
-        feature_importance_df,
-        x="abs_coefficient",
-        y="feature",
-        orientation="h",
-        labels={"abs_coefficient": "Absolute coefficient", "feature": "Feature"},
-        title="Feature Importance",
+    fi_plot = (
+        feature_importance_df.sort_values("abs_coefficient", ascending=False)
+        .set_index("feature")["abs_coefficient"]
     )
-    fig_coef.update_layout(yaxis={"categoryorder": "total ascending"})
-    st.plotly_chart(fig_coef, use_container_width=True)
+
+    st.bar_chart(fi_plot)
 
     st.markdown("Raw coefficients")
     st.dataframe(feature_importance_df[["feature", "coefficient"]])
