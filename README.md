@@ -5,3 +5,4 @@ numpy
 sci-kit
 matplotlib
 plotly.express
+streamlit
