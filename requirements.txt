@@ -1,6 +1,4 @@
-plotly
-plotly.express
-numpy
-sci-kit
-matplotlib
 pandas
+numpy
+scikit-learn
+streamlit
