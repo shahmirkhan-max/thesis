@@ -2,7 +2,7 @@
 plotly
 pandas
 numpy
-sci-kit
+scikit-learn
 matplotlib
 plotly.express
 streamlit
